@@ -259,8 +259,11 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/git,intellij+all,goland+all,go,macos,windows,cmake
-/examples/data-sources/http/.terraform.lock.hcl
-/examples/data-sources/http/.terraform/
-/examples/data-sources/http/terraform.tfstate
+/examples/data-sources/cryptography/.terraform.lock.hcl
+/examples/data-sources/cryptography/.terraform/
+/examples/data-sources/cryptography/terraform.tfstate
 /terraform-dig-sha.iml
 /terraform-provider-cryptography.iml
+/examples/data-sources/cryptography/.terraform.lock.hcl
+/examples/data-sources/cryptography/.terraform/
+/examples/data-sources/cryptography/terraform.tfstate
