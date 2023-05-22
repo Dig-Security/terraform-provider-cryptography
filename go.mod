@@ -1,4 +1,4 @@
-module github.com/terraform-providers/terraform-provider-sha
+module github.com/terraform-providers/terraform-provider-cryptography
 
 go 1.19
 

@@ -263,3 +263,4 @@ $RECYCLE.BIN/
 /examples/data-sources/http/.terraform/
 /examples/data-sources/http/terraform.tfstate
 /terraform-dig-sha.iml
+/terraform-provider-cryptography.iml
