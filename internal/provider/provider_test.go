@@ -7,6 +7,6 @@ import (
 
 func protoV5ProviderFactories() map[string]func() (tfprotov5.ProviderServer, error) {
 	return map[string]func() (tfprotov5.ProviderServer, error){
-		"sha": providerserver.NewProtocol5WithError(New()),
+		"sha512": providerserver.NewProtocol5WithError(New()),
 	}
 }

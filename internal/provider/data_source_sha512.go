@@ -53,13 +53,19 @@ func (d *sha512DataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	enc, err := ianaindex.IANA.Encoding(model.Encoding.ValueString())
 	if err != nil || enc == nil {
-		fmt.Printf("%s is not a supported IANA enc name or alias in this Terraform version", model.Encoding.ValueString())
+		resp.Diagnostics.AddError(
+			"Not a supported IANA encoding",
+			fmt.Sprintf("%s is not a supported IANA encoding name or alias in this Terraform version", model.Encoding.ValueString()),
+		)
 		return
 	}
 	var input = model.Input.ValueString()
 	encodedBytes, err := convertToBytes(input, enc)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		resp.Diagnostics.AddError(
+			"Error convert input to bytes",
+			fmt.Sprintf("Error: %v\n", err),
+		)
 		return
 	}
 	hash := sha512.New()
