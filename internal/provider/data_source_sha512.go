@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/ianaindex"
 )
 
 var _ datasource.DataSource = (*sha512DataSource)(nil)
@@ -30,12 +30,14 @@ func (d *sha512DataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
-
 			"input": schema.StringAttribute{
 				Required: true,
 			},
 			"sha": schema.StringAttribute{
 				Computed: true,
+			},
+			"encoding": schema.StringAttribute{
+				Required: true,
 			},
 		},
 	}
@@ -49,13 +51,13 @@ func (d *sha512DataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	enc, err := getEncoding("ISO-8859-1")
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+	encoding, err := ianaindex.IANA.Encoding(model.Encoding.ValueString())
+	if err != nil || encoding == nil {
+		fmt.Printf("%s is not a supported IANA encoding name or alias in this Terraform version", model.Encoding.ValueString())
 		return
 	}
 	var input = model.Input.ValueString()
-	encodedBytes, err := convertToBytes(input, enc)
+	encodedBytes, err := convertToBytes(input, encoding)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
@@ -71,18 +73,10 @@ func (d *sha512DataSource) Read(ctx context.Context, req datasource.ReadRequest,
 }
 
 type modelV0 struct {
-	ID    types.String `tfsdk:"id"`
-	Input types.String `tfsdk:"input"`
-	Sha   types.String `tfsdk:"sha"`
-}
-
-func getEncoding(encodingName string) (encoding.Encoding, error) {
-	switch encodingName {
-	case "ISO-8859-1":
-		return charmap.ISO8859_1, nil
-	default:
-		return nil, fmt.Errorf("unsupported encoding: %s", encodingName)
-	}
+	ID       types.String `tfsdk:"id"`
+	Input    types.String `tfsdk:"input"`
+	Sha      types.String `tfsdk:"sha"`
+	Encoding types.String `tfsdk:"encoding"`
 }
 
 func convertToBytes(inputString string, enc encoding.Encoding) ([]byte, error) {

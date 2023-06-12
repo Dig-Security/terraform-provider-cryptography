@@ -12,6 +12,7 @@ func TestDataSource_Sha(t *testing.T) {
 			{
 				Config: `data "sha" "sha_test" {
 							input = "some text" 
+							encoding = "ISO-8859-1"	
 						 }`,
 
 				Check: resource.ComposeTestCheckFunc(
