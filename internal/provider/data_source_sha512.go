@@ -21,7 +21,7 @@ func NewSha512DataSource() datasource.DataSource {
 type sha512DataSource struct{}
 
 func (d *sha512DataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = "sha"
+	resp.TypeName = "sha512"
 }
 
 func (d *sha512DataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -51,13 +51,13 @@ func (d *sha512DataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	encoding, err := ianaindex.IANA.Encoding(model.Encoding.ValueString())
-	if err != nil || encoding == nil {
-		fmt.Printf("%s is not a supported IANA encoding name or alias in this Terraform version", model.Encoding.ValueString())
+	enc, err := ianaindex.IANA.Encoding(model.Encoding.ValueString())
+	if err != nil || enc == nil {
+		fmt.Printf("%s is not a supported IANA enc name or alias in this Terraform version", model.Encoding.ValueString())
 		return
 	}
 	var input = model.Input.ValueString()
-	encodedBytes, err := convertToBytes(input, encoding)
+	encodedBytes, err := convertToBytes(input, enc)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return

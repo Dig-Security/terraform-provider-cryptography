@@ -10,7 +10,7 @@ func TestDataSource_Sha(t *testing.T) {
 		ProtoV5ProviderFactories: protoV5ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: `data "sha" "sha_test" {
+				Config: `data "sha512" "sha_test" {
 							input = "some text" 
 							encoding = "ISO-8859-1"	
 						 }`,
