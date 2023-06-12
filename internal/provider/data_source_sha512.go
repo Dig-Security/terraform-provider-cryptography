@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/encoding/ianaindex"
 )
 
 var _ datasource.DataSource = (*sha512DataSource)(nil)
@@ -21,7 +21,7 @@ func NewSha512DataSource() datasource.DataSource {
 type sha512DataSource struct{}
 
 func (d *sha512DataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = "sha"
+	resp.TypeName = "sha512"
 }
 
 func (d *sha512DataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -30,12 +30,14 @@ func (d *sha512DataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
-
 			"input": schema.StringAttribute{
 				Required: true,
 			},
 			"sha": schema.StringAttribute{
 				Computed: true,
+			},
+			"encoding": schema.StringAttribute{
+				Required: true,
 			},
 		},
 	}
@@ -49,15 +51,21 @@ func (d *sha512DataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	enc, err := getEncoding("ISO-8859-1")
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+	enc, err := ianaindex.IANA.Encoding(model.Encoding.ValueString())
+	if err != nil || enc == nil {
+		resp.Diagnostics.AddError(
+			"Not a supported IANA encoding",
+			fmt.Sprintf("%s is not a supported IANA encoding name or alias in this Terraform version", model.Encoding.ValueString()),
+		)
 		return
 	}
 	var input = model.Input.ValueString()
 	encodedBytes, err := convertToBytes(input, enc)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		resp.Diagnostics.AddError(
+			"Error convert input to bytes",
+			fmt.Sprintf("Error: %v\n", err),
+		)
 		return
 	}
 	hash := sha512.New()
@@ -71,18 +79,10 @@ func (d *sha512DataSource) Read(ctx context.Context, req datasource.ReadRequest,
 }
 
 type modelV0 struct {
-	ID    types.String `tfsdk:"id"`
-	Input types.String `tfsdk:"input"`
-	Sha   types.String `tfsdk:"sha"`
-}
-
-func getEncoding(encodingName string) (encoding.Encoding, error) {
-	switch encodingName {
-	case "ISO-8859-1":
-		return charmap.ISO8859_1, nil
-	default:
-		return nil, fmt.Errorf("unsupported encoding: %s", encodingName)
-	}
+	ID       types.String `tfsdk:"id"`
+	Input    types.String `tfsdk:"input"`
+	Sha      types.String `tfsdk:"sha"`
+	Encoding types.String `tfsdk:"encoding"`
 }
 
 func convertToBytes(inputString string, enc encoding.Encoding) ([]byte, error) {
